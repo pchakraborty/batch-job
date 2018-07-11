@@ -67,7 +67,7 @@ class BatchSlurm(BatchJob):
             LOGGER.debug("0: %s" % output[0])
             LOGGER.debug("1: %s" % output[1])
             raise RuntimeError("'sbatch [%s]' failed" % job_script)
-        job_id = output[0].split()[-1].strip()
+        job_id = output[0].split()[-1].strip().decode("utf-8") # decode the bytes
         LOGGER.info("Job id: %s" % job_id)
 
         return job_id
@@ -97,6 +97,6 @@ class BatchSlurm(BatchJob):
             LOGGER.debug("0: %s" % output[0])
             LOGGER.debug("1: %s" % output[1])
             raise RuntimeError('command [%s] failed' % cmd)
-        status = output[0].strip()
+        status = output[0].strip().decode("utf-8")
 
         return status
