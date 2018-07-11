@@ -32,7 +32,7 @@ class TestBatchJob(unittest.TestCase):
 
         while True:
             if job.completed(job_id):
-                logging.info("%s: %s" % (job_id, job.CompletionStatus(job_id)))
+                logging.info("%s: %s" % (job_id, job.completion_status(job_id)))
                 break
             logging.debug("waiting...")
             time.sleep(15)
