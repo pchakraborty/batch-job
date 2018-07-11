@@ -2,15 +2,16 @@
 import os
 import logging
 import subprocess as sp
-from abc import ABCMeta, abstractmethod
+import abc
+# compatible with Python 2 and 3
+ABC = abc.ABCMeta("ABC", (object,), {'__slots__': ()})
 
 LOGGER = logging.getLogger(__name__)
 
-class BatchJob(object):
+class BatchJob(ABC):
     """
     Base class defining interfaces to interact with job schedulers
     """
-    __metaclass__ = ABCMeta
 
     @staticmethod
     def factory(batch_type):
@@ -23,21 +24,21 @@ class BatchJob(object):
         else:
             raise ValueError("batch type [%s] is not supported" % batch_type)
 
-    @abstractmethod
+    @abc.abstractmethod
     def submit(self, job_script):
         """
         Submit job defined in job_script and return job id
         """
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def is_complete(self, job_id):
         """
         Return True if job has finished, else return False
         """
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def completion_status(self, job_id):
         """
         Return completion status (COMPLETED, FAILED etc.) of job job_id.
