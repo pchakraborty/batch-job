@@ -9,19 +9,18 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from batch_job import BatchJob
 
-log_fmt = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"
-logging.basicConfig(level=logging.DEBUG, format=log_fmt)
-logger = logging.getLogger(__name__)
+LOG_FMT = "%(asctime)s %(name)-12s %(levelname)-8s %(message)s"
+logging.basicConfig(level=logging.DEBUG, format=LOG_FMT)
+LOGGER = logging.getLogger(__name__)
 
 class TestBatchJob(unittest.TestCase):
-    """
-    TODO: add docstring
-    """
+    """Docstring"""
 
     def setUp(self):
         self.utest_dir = os.path.dirname(os.path.realpath(__file__))
-        logger.info("Unit test location: %s" % self.utest_dir)
-        
+        LOGGER.info("Unit test location: %s" % self.utest_dir)
+        self.slurm_output = None
+
     def test_batch_script_submission(self):
         """
         Test building suite definition
@@ -29,17 +28,17 @@ class TestBatchJob(unittest.TestCase):
         job_script = os.path.join(self.utest_dir, "abc.sh")
         job = BatchJob.factory("slurm") # BatchSlurm object
         job_id = job.submit(job_script)
-        self.slurm_output = "slurm-%s.out" % job_id
-
         while True:
             if job.is_complete(job_id):
-                logger.info("%s: %s" % (job_id, job.completion_status(job_id)))
+                LOGGER.info("%s: %s" % (job_id, job.completion_status(job_id)))
                 break
-            logger.debug("waiting...")
+            LOGGER.debug("waiting...")
             time.sleep(15)
-        
+        self.slurm_output = "slurm-%s.out" % job_id
+
     def tearDown(self):
-        os.remove(os.path.join(self.utest_dir, self.slurm_output))
+        if self.slurm_output:
+            os.remove(os.path.join(self.utest_dir, self.slurm_output))
 
 if __name__ == "__main__":
     unittest.main()
