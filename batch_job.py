@@ -1,10 +1,9 @@
+"""Docstring:"""
 import os
-import time
 import logging
 import subprocess as sp
-from datetime import datetime
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 class BatchJob(object):
     """
@@ -30,15 +29,15 @@ class BatchJob(object):
         raise NotImplementedError()
 
     @staticmethod
-    def factory(type):
+    def factory(batch_type):
         """
         Factory method returning an instance of a derived class
         based on the input type
         """
-        if type.strip().lower()=="slurm":
+        if batch_type.strip().lower()=="slurm":
             return BatchSlurm()
         else:
-            raise ValueError("batch type [%s] is not supported" % type)
+            raise ValueError("batch type [%s] is not supported" % batch_type)
 
 class BatchSlurm(BatchJob):
     """
@@ -55,16 +54,16 @@ class BatchSlurm(BatchJob):
         # submit job
         job_dir = os.path.dirname(os.path.abspath(job_script))
         cmd = ["sbatch", job_script]
-        logger.info("Submit command: %s" % " ".join(cmd))
+        LOGGER.info("Submit command: %s" % " ".join(cmd))
         run = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=job_dir)
         output = run.communicate()
-        rc = run.wait()
-        if rc !=0:
-            logger.debug("0: %s" % output[0])
-            logger.debug("1: %s" % output[1])
+        return_code = run.wait()
+        if return_code != 0:
+            LOGGER.debug("0: %s" % output[0])
+            LOGGER.debug("1: %s" % output[1])
             raise RuntimeError("'sbatch [%s]' failed" % job_script)
         job_id = output[0].split()[-1].strip()
-        logger.info("Job id: %s" % job_id)
+        LOGGER.info("Job id: %s" % job_id)
 
         return job_id
 
@@ -74,8 +73,8 @@ class BatchSlurm(BatchJob):
         a non-zero exit code
         """
         cmd = "squeue -j %s" % job_id
-        rc = sp.call(cmd.split(), stdout=sp.PIPE, stderr=sp.PIPE)
-        if rc==0:
+        return_code = sp.call(cmd.split(), stdout=sp.PIPE, stderr=sp.PIPE)
+        if return_code == 0:
             return False
         else:
             return True
@@ -88,10 +87,10 @@ class BatchSlurm(BatchJob):
         cmd = 'sacct --format state -n -j %s.batch' % job_id
         run = sp.Popen(cmd.split(), stdout=sp.PIPE, stderr=sp.PIPE)
         output = run.communicate()
-        rc = run.wait()
-        if rc != 0:
-            logger.debug("0: %s" % output[0])
-            logger.debug("1: %s" % output[1])
+        return_code = run.wait()
+        if return_code != 0:
+            LOGGER.debug("0: %s" % output[0])
+            LOGGER.debug("1: %s" % output[1])
             raise RuntimeError('command [%s] failed' % cmd)
         status = output[0].strip()
 
