@@ -55,7 +55,7 @@ class BatchSlurm(BatchJob):
         # submit job
         job_dir = os.path.dirname(os.path.abspath(job_script))
         cmd = ["sbatch", job_script]
-        logger.info("cmd: %s" % " ".join(cmd))
+        logger.info("Submit command: %s" % " ".join(cmd))
         run = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=job_dir)
         output = run.communicate()
         rc = run.wait()
@@ -64,7 +64,7 @@ class BatchSlurm(BatchJob):
             logger.debug("1: %s" % output[1])
             raise RuntimeError("'sbatch [%s]' failed" % job_script)
         job_id = output[0].split()[-1].strip()
-        logger.info("job_id: %s" % job_id)
+        logger.info("Job id: %s" % job_id)
 
         return job_id
 
