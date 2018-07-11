@@ -31,7 +31,7 @@ class TestBatchJob(unittest.TestCase):
         self.slurm_output = "slurm-%s.out" % job_id
 
         while True:
-            if job.completed(job_id):
+            if job.is_complete(job_id):
                 logging.info("%s: %s" % (job_id, job.completion_status(job_id)))
                 break
             logging.debug("waiting...")

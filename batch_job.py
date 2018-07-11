@@ -17,7 +17,7 @@ class BatchJob(object):
         """
         raise NotImplementedError()
 
-    def completed(self, job_id):
+    def is_complete(self, job_id):
         """
         Return True if job has finished, else return False
         """
@@ -68,7 +68,7 @@ class BatchSlurm(BatchJob):
 
         return job_id
 
-    def completed(self, job_id):
+    def is_complete(self, job_id):
         """
         Return true if job is not in queue anymore, i.e. squeue returns
         a non-zero exit code
