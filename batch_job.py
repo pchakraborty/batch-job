@@ -49,16 +49,14 @@ class BatchSlurm(BatchJob):
         """
         Submit job defined in job_script and return job id
         """
-
         if not os.path.isfile(job_script):
             raise IOError("job script [%s] not found" % job_script)
 
-        jobDir = os.path.dirname(os.path.abspath(job_script))
-
         # submit job
+        job_dir = os.path.dirname(os.path.abspath(job_script))
         cmd = ["sbatch", job_script]
         logger.info("cmd: %s" % " ".join(cmd))
-        run = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=jobDir)
+        run = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=job_dir)
         output = run.communicate()
         rc = run.wait()
         if rc !=0:
@@ -70,27 +68,23 @@ class BatchSlurm(BatchJob):
 
         return job_id
 
-
     def completed(self, job_id):
         """
         Return true if job is not in queue anymore, i.e. squeue returns
         a non-zero exit code
         """
-
         cmd = "squeue -j %s" % job_id
         rc = sp.call(cmd.split(), stdout=sp.PIPE, stderr=sp.PIPE)
         if rc==0:
             return False
         else:
             return True
-
             
     def completion_status(self, job_id):
         """
         Return the completion status (COMPLETED, FAILED etc.)
         of a completed job
         """
-
         cmd = 'sacct --format state -n -j %s.batch' % job_id
         run = sp.Popen(cmd.split(), stdout=sp.PIPE, stderr=sp.PIPE)
         output = run.communicate()
