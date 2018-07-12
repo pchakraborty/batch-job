@@ -56,21 +56,12 @@ class BatchSlurm(BatchJob):
         """
         if not os.path.isfile(job_script):
             raise IOError("job script [%s] not found" % job_script)
-
-        # submit job
         job_dir = os.path.dirname(os.path.abspath(job_script))
         cmd = ["sbatch", job_script]
         LOGGER.info("Submit command: %s" % " ".join(cmd))
-        run = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.PIPE, cwd=job_dir)
-        output = run.communicate()
-        return_code = run.wait()
-        if return_code != 0:
-            LOGGER.debug("0: %s" % output[0])
-            LOGGER.debug("1: %s" % output[1])
-            raise RuntimeError("'sbatch [%s]' failed" % job_script)
-        job_id = output[0].split()[-1].strip().decode("utf-8") # decode the bytes
+        output = sp.check_output(cmd, cwd=job_dir)
+        job_id = output.decode("utf-8").strip().split()[-1]
         LOGGER.info("Job id: %s" % job_id)
-
         return job_id
 
     def is_complete(self, job_id):
@@ -91,13 +82,6 @@ class BatchSlurm(BatchJob):
         of a completed job
         """
         cmd = 'sacct --format state -n -j %s.batch' % job_id
-        run = sp.Popen(cmd.split(), stdout=sp.PIPE, stderr=sp.PIPE)
-        output = run.communicate()
-        return_code = run.wait()
-        if return_code != 0:
-            LOGGER.debug("0: %s" % output[0])
-            LOGGER.debug("1: %s" % output[1])
-            raise RuntimeError('command [%s] failed' % cmd)
-        status = output[0].strip().decode("utf-8")
-
+        output = sp.check_output(cmd.split())
+        status = output.decode("utf-8").strip()
         return status
